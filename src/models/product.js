@@ -6,6 +6,12 @@ const Product = {
     return rows;
   },
 
+  getProductsWithPagination: async (limit, offset) => {
+    const [rows] = await db.query('SELECT * FROM products WHERE deleted_at IS NULL LIMIT ? OFFSET ? ', [limit, offset]);
+    const [[{ total }]] = await db.query('SELECT COUNT (*) AS total FROM products WHERE deleted_at IS NULL')
+    return { data: rows, total };
+  },
+
   getProductById: async (id) => {
     const [rows] = await db.query('SELECT * FROM products WHERE id = ? AND deleted_at IS NULL', [id]);
     return rows.length > 0 ? rows[0] : null;
@@ -54,22 +60,6 @@ const Product = {
 
     return result;
   },
-
-  // updateProductById: async (id, product_name, product_price, capital_price) => {
-  //   const profit = product_price - capital_price;
-  //   const query = `
-  //     UPDATE products
-  //     SET
-  //       product_name = ?,
-  //       product_price = ?,
-  //       capital_price = ?,
-  //       profit = ?,
-  //       updated_at = CURRENT_TIMESTAMP
-  //     WHERE id = ?`;
-  //   const values = [product_name, product_price, capital_price, profit, id];
-  //   const [result] = await db.query(query, values);
-  //   return result;
-  // },
 
   deleteProduct: async (id) => {
     const query = `

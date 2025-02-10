@@ -3,9 +3,29 @@ const { successResponse, errorResponse } = require('../utils/responseHandler');
 
 exports.getProducts = async (req, res) => {
   try {
-    const data = await ProductModel.getAllProducts();
-    return successResponse(res, data);
+    let { page, limit } = req.query;
+
+    if (!page || !limit) {
+      const data = await ProductModel.getAllProducts();
+      return successResponse(res, {
+        totalItems: data.length,
+        data
+      })
+    }
+
+    page = parseInt(page);
+    limit = parseInt(limit);
+    const offset = (page - 1) * limit;
+    
+    const { data, total } = await ProductModel.getProductsWithPagination(limit, offset);
+    return successResponse(res, {
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalItems: total,
+      data
+    });
   } catch (error) {
+    console.log('error: ', error);
     return errorResponse(res, error);
   }
 };
