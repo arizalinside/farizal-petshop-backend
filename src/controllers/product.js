@@ -121,34 +121,6 @@ exports.updateProduct = async (req, res) => {
   }
 };
 
-// exports.updateProductById = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const { product_name, product_price, capital_price } = req.body;
-
-//     // check product exists in database
-//     const product = await ProductModel.getProductById(id);
-//     if (!product) {
-//       return errorResponse(res, "Product not found", 404);
-//     }
-
-//     // update product
-//     const updatedProduct = await ProductModel.updateProductById(id, product_name, product_price, capital_price);
-
-//     if (updatedProduct.affectedRows === 0) {
-//       return errorResponse(err, "Failed to update product", 404);
-//     }
-
-//     // get updated product
-//     const updatedProductData = await ProductModel.getProductById(id)
-
-//     return successResponse(res, updatedProductData);
-//   } catch (error) {
-//     console.log("error: ", error);
-//     return errorResponse(res, error);
-//   }
-// };
-
 exports.deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
