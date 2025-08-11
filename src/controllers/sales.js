@@ -1,4 +1,5 @@
 const SalesModel = require("../models/sales");
+const ProductModel = require("../models/product");
 const { successResponse, errorResponse } = require("../utils/responseHandler");
 
 exports.getSales = async (req, res) => {
@@ -9,26 +10,29 @@ exports.getSales = async (req, res) => {
       const data = await SalesModel.getAllSales();
       return successResponse(res, {
         totalItems: data.length,
-        data
-      })
+        data,
+      });
     }
 
     page = parseInt(page);
     limit = parseInt(limit);
     const offset = (page - 1) * limit;
 
-    const { data, total } = await SalesModel.getSalesWithPagination(limit, offset);
+    const { data, total } = await SalesModel.getSalesWithPagination(
+      limit,
+      offset
+    );
     return successResponse(res, {
       currentPage: page,
       totalPages: Math.ceil(total / limit),
       totalItems: total,
-      data
+      data,
     });
   } catch (error) {
-    console.log('error: ', error);
+    console.log("error: ", error);
     return errorResponse(res, error);
   }
-}
+};
 
 exports.getSalesById = async (req, res) => {
   try {
@@ -36,14 +40,14 @@ exports.getSalesById = async (req, res) => {
 
     const sales = await SalesModel.getSalesById(id);
     if (!sales) {
-      return errorResponse(res, 'Sales not found', 404);
+      return errorResponse(res, "Sales not found", 404);
     }
 
     return successResponse(res, product);
   } catch (error) {
     return errorResponse(res, error);
   }
-}
+};
 
 exports.createSales = async (req, res) => {
   try {
@@ -63,15 +67,22 @@ exports.createSales = async (req, res) => {
     const profit = (product_price - capital_price) * quantity;
 
     // save sales to database
-    const salesData = { product_id, product_name, quantity, product_price, capital_price, profit };
-    const newSales =  await SalesModel.createSales(salesData);
+    const salesData = {
+      product_id,
+      product_name,
+      quantity,
+      product_price,
+      capital_price,
+      profit,
+    };
+    const newSales = await SalesModel.createSales(salesData);
 
     return successResponse(res, { id: newSales.insertId, ...salesData }, 201);
   } catch (error) {
     console.log("error: ", error);
     return errorResponse(res, error);
   }
-}
+};
 
 exports.updateSales = async (req, res) => {
   try {
@@ -79,14 +90,39 @@ exports.updateSales = async (req, res) => {
     const { product_price, capital_price, quantity } = req.body;
 
     if (!id) {
-      return errorResponse(res, 'Sales ID is required', 400);
+      return errorResponse(res, "Sales ID is required", 400);
     }
     if (!quantity) {
-      return errorResponse(res, 'Quantity is required', 400);
+      return errorResponse(res, "Quantity is required", 400);
     }
 
     const profit = product_price - capital_price;
+
+    const sales = await SalesModel.updateSales({
+      id,
+      product_price,
+      capital_price,
+      quantity,
+      profit,
+    });
+
+    if (sales.affectedRows === 0) {
+      return errorResponse(res, "Sales not found or no changes made", 404);
+    }
+
+    return successResponse(
+      res,
+      {
+        id,
+        product_name,
+        product_price,
+        capital_price,
+        quantity,
+        profit,
+      },
+      200
+    );
   } catch (error) {
-    
+    console.error("Erro updating product: ", error);
   }
-}
+};
